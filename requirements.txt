@@ -1,0 +1,6 @@
+flask
+rembg
+opencv-python
+pillow
+numpy
+werkzeug

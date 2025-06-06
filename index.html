@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic BG Remover | High Quality Background Removal</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --danger: #d63031;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: slideIn 0.8s ease-out 0.2s both;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #636e72;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            animation: slideIn 0.8s ease-out 0.4s both;
+        }
+
+        .upload-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            animation: slideIn 0.8s ease-out 0.6s both;
+        }
+
+        .upload-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .drop-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-area:hover {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .drop-area.highlight {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .drop-area:hover .upload-icon {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+
+        .drop-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .drop-hint {
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(108, 92, 231, 0.1);
+            box-shadow: none;
+        }
+
+        .result-container {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(108, 92, 231, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .error-message {
+            color: var(--danger);
+            background: rgba(214, 48, 49, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #636e72;
+            font-size: 0.9rem;
+            animation: fadeIn 0.8s ease-out 1s both;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .upload-container {
+                padding: 1.5rem;
+            }
+            
+            .drop-area {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* Confetti effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary);
+            opacity: 0;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-magic logo-icon"></i>
+                <span>Magic BG Remover</span>
+            </div>
+            <div class="tooltip">
+                <i class="fas fa-info-circle" style="color: var(--primary); font-size: 1.5rem;"></i>
+                <span class="tooltiptext">Upload any image to remove its background automatically. Works best with clear subjects.</span>
+            </div>
+        </header>
+
+        <main class="main">
+            <h1>Remove Background from Images</h1>
+            <p class="subtitle">Get high-quality transparent background images in seconds. No signup required, completely free!</p>
+
+            <div class="upload-container">
+                <div class="drop-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="drop-text">Drag & Drop your image here</p>
+                    <p class="drop-hint">or click to browse files (PNG, JPG, JPEG)</p>
+                    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg">
+                    <button class="btn" id="uploadBtn">Select Image</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Removing background...</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-grid">
+                    <div class="image-container">
+                        <img id="originalImage" src="" alt="Original Image">
+                        <div class="image-label">Original Image</div>
+                    </div>
+                    <div class="image-container">
+                        <img id="resultImage" src="" alt="Result Image">
+                        <div class="image-label">Background Removed</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="downloadBtn">
+                        <i class="fas fa-download"></i> Download Result
+                    </button>
+                    <button class="btn" id="newImageBtn">
+                        <i class="fas fa-redo"></i> Process New Image
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Magic BG Remover - Free Online Background Removal Tool</p>
+        </footer>
+    </div>
+
+    <div id="particles"></div>
+    <div id="confetti-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create particles
+            createParticles();
+            
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const originalImage = document.getElementById('originalImage');
+            const resultImage = document.getElementById('resultImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const newImageBtn = document.getElementById('newImageBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const progressBar = document.getElementById('progressBar');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            // Handle dropped files
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            // Handle file selection via button
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFiles);
+
+            // New image button
+            newImageBtn.addEventListener('click', resetUI);
+
+            // Download button
+            downloadBtn.addEventListener('click', downloadResult);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    handleFiles({ target: { files } });
+                }
+            }
+
+            function handleFiles(e) {
+                const files = e.target.files;
+                if (!files.length) return;
+
+                const file = files[0];
+                if (!file.type.match('image.*')) {
+                    showError('Please select an image file (JPEG, PNG)');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    showError('Image size should be less than 10MB');
+                    return;
+                }
+
+                processImage(file);
+            }
+
+            function processImage(file) {
+                // Reset UI
+                errorMessage.style.display = 'none';
+                resultContainer.style.display = 'none';
+                loading.style.display = 'flex';
+                
+                // Show original image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalImage.src = e.target.result;
+                    
+                    // Simulate progress (in a real app, this would come from the backend)
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += Math.random() * 10;
+                        if (progress > 90) progress = 90; // Don't go to 100% until we get response
+                        progressBar.style.width = `${progress}%`;
+                    }, 300);
+                    
+                    // Prepare form data
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    
+                    // Send to backend
+                    fetch('http://localhost:5000/remove-background', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        clearInterval(progressInterval);
+                        progressBar.style.width = '100%';
+                        
+                        if (!response.ok) {
+                            throw new Error('Background removal failed');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const resultUrl = URL.createObjectURL(blob);
+                        resultImage.src = resultUrl;
+                        
+                        // Show result
+                        loading.style.display = 'none';
+                        resultContainer.style.display = 'block';
+                        
+                        // Trigger confetti effect
+                        createConfetti();
+                    })
+                    .catch(error => {
+                        clearInterval(progressInterval);
+                        loading.style.display = 'none';
+                        showError(error.message || 'Failed to remove background. Please try another image.');
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
+            }
+
+            function resetUI() {
+                fileInput.value = '';
+                originalImage.src = '';
+                resultImage.src = '';
+                resultContainer.style.display = 'none';
+                errorMessage.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+
+            function downloadResult() {
+                if (!resultImage.src) return;
+                
+                const link = document.createElement('a');
+                link.href = resultImage.src;
+                link.download = 'background-removed.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 20;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random properties
+                    const size = Math.random() * 10 + 5;
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    const delay = Math.random() * 5;
+                    const duration = Math.random() * 10 + 10;
+                    const opacity = Math.random() * 0.5 + 0.1;
+                    const color = `hsl(${Math.random() * 60 + 240}, 70%, 60%)`;
+                    
+                    // Apply styles
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${posX}%`;
+                    particle.style.top = `${posY}%`;
+                    particle.style.animationDelay = `${delay}s`;
+                    particle.style.animationDuration = `${duration}s`;
+                    particle.style.opacity = opacity;
+                    particle.style.background = color;
+                    
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            function createConfetti() {
+                const container = document.getElementById('confetti-container');
+                container.innerHTML = '';
+                
+                const confettiCount = 100;
+                const colors = ['#6c5ce7', '#a29bfe', '#00b894', '#fd79a8', '#fdcb6e'];
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Random properties
+                    const size = Math.random() * 10 + 5;
+                    const posX = Math.random() * window.innerWidth;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const animationDuration = Math.random() * 3 + 2;
+                    const delay = Math.random() * 2;
+                    const rotation = Math.random() * 360;
+                    const shape = Math.random() > 0.5 ? '50%' : '0';
+                    
+                    // Apply styles
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.left = `${posX}px`;
+                    confetti.style.background = color;
+                    confetti.style.borderRadius = shape;
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    confetti.style.animation = `fall ${animationDuration}s ease-in ${delay}s forwards`;
+                    
+                    // Create keyframes dynamically
+                    const keyframes = `
+                        @keyframes fall {
+                            to {
+                                top: 100%;
+                                opacity: 0;
+                                transform: translateY(200px) rotate(${rotation + 360}deg);
+                            }
+                        }
+                    `;
+                    
+                    const style = document.createElement('style');
+                    style.innerHTML = keyframes;
+                    document.head.appendChild(style);
+                    
+                    container.appendChild(confetti);
+                }
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
