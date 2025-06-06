@@ -1,5 +1,5 @@
 from flask import Flask, request, send_file, jsonify
-from flask_cors import CORS  # Add this import
+from flask_cors import CORS  # For handling Cross-Origin Requests
 from werkzeug.utils import secure_filename
 import os
 import cv2
@@ -7,9 +7,15 @@ import numpy as np
 from rembg import remove
 import io
 from PIL import Image
+import onnxruntime  # ONNX Runtime for model inference
 
 app = Flask(__name__)
-CORS(app)  # Add this line to enable CORS
+# Configure CORS to allow requests from your frontend domains
+CORS(app, resources={
+    r"/remove-background": {
+        "origins": ["http://localhost:5500", "http://127.0.0.1:5500", "https://your-blogger-domain.com"]
+    }
+})
 
 # Configuration
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -26,6 +32,7 @@ def allowed_file(filename):
 
 def remove_background(input_path, output_path):
     try:
+        # Initialize ONNX Runtime session (rembg handles this internally)
         with open(input_path, 'rb') as i:
             with open(output_path, 'wb') as o:
                 input_data = i.read()
@@ -81,7 +88,13 @@ def process_image():
 
 @app.route('/')
 def home():
-    return "Background Removal Service is running!"
+    return "Background Removal Service is running with CORS and ONNX Runtime support!"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Check if ONNX Runtime is available
+    try:
+        print(f"ONNX Runtime version: {onnxruntime.__version__}")
+    except Exception as e:
+        print(f"ONNX Runtime error: {e}")
+    
+    app.run(host='0.0.0.0', port=5000, debug=True)
